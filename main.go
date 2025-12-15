@@ -10,7 +10,7 @@ import (
 )
 
 var Token string
-				var s *discordgo.Session
+var s *discordgo.Session
 
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot token")
