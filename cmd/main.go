@@ -7,14 +7,24 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/gothew/l-og"
+	"github.com/joho/godotenv"
 	"github.com/keplerlabsm42/hubble/internal/commands"
 )
 
 var Token string
 var s *discordgo.Session
 
+func loadEnv() {
+	// Load environment variables from .env file if it exists
+	err := godotenv.Load()
+	if err != nil {
+		log.Warn("No .env file found")
+	}
+}
+
 func init() {
-	flag.StringVar(&Token, "t", "", "Bot token")
+	loadEnv()
+	flag.StringVar(&Token, "t", os.Getenv("TOKEN"), "Bot token")
 	flag.Parse()
 }
 
@@ -27,45 +37,16 @@ func init() {
 	}
 }
 
-var (
-	commandList = []*discordgo.ApplicationCommand{
-		{
-			Name:        "info",
-			Description: "Get info about the bot",
-		},
-	}
-
-	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"info": commands.InfoCommand,
-	}
-)
-
-func init() {
-	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
-		}
-	})
-}
-
 func main() {
-	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Info("Bot is up and running")
-	})
-
 	if err := s.Open(); err != nil {
 		log.Fatalf("error opening connection %v", err)
 		return
 	}
-	log.Info("Adding commands...\n")
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(commandList))
-	for i, v := range commandList {
-		cmd, err := s.ApplicationCommandCreate(s.State.User.ID, "", v)
-		if err != nil {
-			log.Errorf("Cannot create '%v' command: %v", v.Name, err)
-		}
-		registeredCommands[i] = cmd
-	}
+
+	command := commands.NewCommands(s)
+	command.AddHandlers()
+	command.StartHandlers()
+	command.RegistryCommands()
 	defer s.Close()
 
 	stop := make(chan os.Signal, 1)
