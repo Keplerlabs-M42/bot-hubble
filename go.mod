@@ -5,6 +5,7 @@ go 1.25.5
 require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/gothew/l-og v1.0.1
+	github.com/joho/godotenv v1.5.1
 )
 
 require (
