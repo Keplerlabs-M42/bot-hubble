@@ -7,6 +7,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/gothew/l-og"
+	"github.com/keplerlabsm42/hubble/internal/commands"
 )
 
 var Token string
@@ -27,7 +28,7 @@ func init() {
 }
 
 var (
-	commands = []*discordgo.ApplicationCommand{
+	commandList = []*discordgo.ApplicationCommand{
 		{
 			Name:        "info",
 			Description: "Get info about the bot",
@@ -35,14 +36,7 @@ var (
 	}
 
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"info": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Hey Everyone, I'm hubble bot, just here to remind you of our mortality.",
-				},
-			})
-		},
+		"info": commands.InfoCommand,
 	}
 )
 
@@ -64,8 +58,8 @@ func main() {
 		return
 	}
 	log.Info("Adding commands...\n")
-	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
-	for i, v := range commands {
+	registeredCommands := make([]*discordgo.ApplicationCommand, len(commandList))
+	for i, v := range commandList {
 		cmd, err := s.ApplicationCommandCreate(s.State.User.ID, "", v)
 		if err != nil {
 			log.Errorf("Cannot create '%v' command: %v", v.Name, err)
