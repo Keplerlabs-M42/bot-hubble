@@ -9,6 +9,7 @@ import (
 	log "github.com/gothew/l-og"
 	"github.com/joho/godotenv"
 	"github.com/keplerlabsm42/hubble/internal/commands"
+	"github.com/keplerlabsm42/hubble/internal/webhooks"
 )
 
 var Token string
@@ -48,6 +49,9 @@ func main() {
 	command.StartHandlers()
 	command.RegistryCommands()
 	defer s.Close()
+
+	server := webhooks.NewServer(":3000", s)
+	log.Fatal(server.Start())
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)

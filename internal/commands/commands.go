@@ -5,9 +5,11 @@ import (
 	log "github.com/gothew/l-og"
 )
 
+type CommandHandler func(s *discordgo.Session, i *discordgo.InteractionCreate)
+
 type Command struct {
 	Session  *discordgo.Session
-	Handlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
+	Handlers map[string]CommandHandler
 }
 
 var commandRegistry = []*discordgo.ApplicationCommand{
@@ -35,7 +37,7 @@ func (c *Command) StartHandlers() {
 }
 
 func (c *Command) AddHandlers() {
-	c.Handlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+	c.Handlers = map[string]CommandHandler{
 		"info": InfoCommand,
 	}
 }
